@@ -62,7 +62,7 @@ userSchema.methods = {
         .update(password)
         .digest("hex");
     } catch (err) {
-      return "Lado";
+      return "Lado vayo";
     }
   },
 };
