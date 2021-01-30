@@ -121,9 +121,9 @@ exports.update = (req, res) => {
     if (files.photo) {
       console.log("FILES PHOTO: ", files.photo);
 
-      if (files.photo.size > 2000000) {
+      if (files.photo.size > 20000000) {
         return res.status(400).json({
-          error: "Image needs to be less than 1 MB",
+          error: "Image needs to be less than 20 MB",
         });
       }
       product.photo.data = fs.readFileSync(files.photo.path);
@@ -141,4 +141,32 @@ exports.update = (req, res) => {
       res.json(result);
     });
   });
+};
+
+/*
+-> sell /arrival
+-> by sell = /products?sortBy=sold&order=desc&limit=4
+-> by arrival = /products?sortBy=createdAt&order=desc&limit=4
+-> if no params are sent, then all products are returned
+
+Note: All the query parameters will come from client (browers)
+*/
+exports.list = (req, res) => {
+  let order = req.query.order ? req.query.order : "asc";
+  let sortBy = req.query.sortBy ? req.query.sortBy : "_id";
+  let limit = req.query.limit ? parseInt(req.query.limit) : 5;
+
+  Product.find()
+    .select("-photo")
+    .populate("category")
+    .sort([[sortBy, order]])
+    .limit(limit)
+    .exec((err, products) => {
+      if (err) {
+        return res.status(400).json({
+          error: "Products not found",
+        });
+      }
+      res.send(products);
+    });
 };
