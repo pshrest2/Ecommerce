@@ -14,7 +14,7 @@ const uniqueMessage = (error) => {
       fieldName.charAt(0).toUpperCase() +
       fieldName.slice(1) +
       " already exists";
-  } catch (ex) {
+  } catch (err) {
     output = "Unique field already exists";
   }
 
@@ -32,6 +32,7 @@ exports.errorHandler = (error) => {
       case 11000:
       case 11001:
         message = uniqueMessage(error);
+
         break;
       default:
         message = "Something went wrong";
