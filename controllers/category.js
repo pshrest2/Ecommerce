@@ -55,7 +55,7 @@ exports.update = (req, res) => {
       });
     }
 
-    res.json({ data });
+    res.json(data);
   });
 };
 
@@ -66,6 +66,7 @@ exports.list = (req, res) => {
         error: errorHandler(err),
       });
     }
-    res.json({ data });
+
+    res.json(data);
   });
 };
