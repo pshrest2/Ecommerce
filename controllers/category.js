@@ -8,6 +8,7 @@ exports.categoryById = (req, res, next, id) => {
         error: "Category does not exist",
       });
     }
+
     req.category = category;
     next();
   });

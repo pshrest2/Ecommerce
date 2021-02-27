@@ -212,9 +212,6 @@ exports.listBySearch = (req, res) => {
   let findArgs = {};
 
   for (let key in req.body.filters) {
-    console.log(key);
-    console.log("----------------------------------");
-
     if (req.body.filters[key].length > 0) {
       if (key === "price") {
         // gte -  greater than price [0-10]
