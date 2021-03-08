@@ -245,6 +245,38 @@ exports.listBySearch = (req, res) => {
     });
 };
 
+exports.listSearched = (req, res) => {
+  //create query object to hold search value and category value
+  const querySearchAndCategory = {};
+  const search = req.query.search;
+  const category = req.query.category;
+
+  //assign search value to query.name
+  //i = case insensitivity, regex provides regular expression properties in mongoose for pattern matching
+  if (search) {
+    querySearchAndCategory.name = { $regex: search, $options: "i" };
+
+    //TODO: how to implement search by description as well?
+    // querySearchAndCategory.description = { $regex: search, $options: "i" };
+
+    //assign category value to query.category
+    if (category && category != "All") {
+      querySearchAndCategory.category = category;
+    }
+
+    //find the product based on query object with 2 properties i.e. search and category
+    Product.find(querySearchAndCategory, (err, products) => {
+      if (err) {
+        return res.status(400).json({
+          error: errorHandler(err),
+        });
+      }
+      res.json(products);
+      console.log(products);
+    }).select("-photo");
+  }
+};
+
 exports.photo = (req, res, next) => {
   if (req.product.photo.data) {
     res.set("Content-Type", req.product.photo.contentType);
