@@ -101,21 +101,6 @@ exports.update = (req, res) => {
       });
     }
 
-    //check all fields to make sure data is availalbe
-    const { name, description, price, category, quantity, shipping } = fields;
-    if (
-      !name ||
-      !description ||
-      !price ||
-      !category ||
-      !quantity ||
-      !shipping
-    ) {
-      return res.status(400).json({
-        error: "All Fields are required",
-      });
-    }
-
     let product = req.product;
     product = _.extend(product, fields);
 
