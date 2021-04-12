@@ -7,7 +7,7 @@ exports.orderById = (req, res, next, id) => {
     .exec((err, order) => {
       if (err || !order) {
         return res.status(400).json({
-          error: errorHandler(error),
+          error: errorHandler(err),
         });
       }
       req.order = order;
@@ -16,8 +16,6 @@ exports.orderById = (req, res, next, id) => {
 };
 
 exports.create = (req, res) => {
-  //   console.log("CREATE ORDER: ", req.body);
-
   req.body.order.user = req.profile;
   const order = new Order(req.body.order);
   order.save((error, data) => {
@@ -42,6 +40,24 @@ exports.listOrders = (req, res) => {
       }
       res.json(orders);
     });
+};
+
+// exports.findOrder = (req, res, id) => {
+//   console.log("lado vayo nita");
+//   Order.find({ transaction_id: id })
+//     .populate("products.product", "name price")
+//     .exec((err, order) => {
+//       if (err || !order) {
+//         return res.status(400).json({
+//           error: errorHandler(error),
+//         });
+//       }
+//       res.json(order);
+//     });
+// };
+
+exports.findOrder = (req, res) => {
+  return res.json(req.order);
 };
 
 exports.getStatusValues = (req, res) => {

@@ -9,7 +9,9 @@ const {
   getStatusValues,
   orderById,
   updateOrderStatus,
+  findOrder,
 } = require("../controllers/order");
+
 const { decreaseQuantity } = require("../controllers/product");
 
 router.post(
@@ -29,6 +31,14 @@ router.get(
   isAdmin,
   getStatusValues
 );
+router.get(
+  "/order/:orderId/:userId",
+  requireSignin,
+  isAuth,
+  isAdmin,
+  findOrder
+);
+
 router.put(
   "/order/:orderId/status/:userId",
   requireSignin,
