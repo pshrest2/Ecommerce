@@ -30,7 +30,7 @@ exports.create = (req, res) => {
 
 exports.listOrders = (req, res) => {
   Order.find()
-    .populate("user", "_id name address")
+    .populate("user", "_id name address1 address2 city state zip")
     .sort("-created")
     .exec((error, orders) => {
       if (error) {
