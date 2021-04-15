@@ -38,6 +38,7 @@ router.get(
   isAdmin,
   findOrder
 );
+router.get("/order-user/:orderId/:userId", requireSignin, isAuth, findOrder);
 
 router.put(
   "/order/:orderId/status/:userId",
