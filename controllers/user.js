@@ -22,21 +22,39 @@ exports.read = (req, res) => {
 };
 
 exports.update = (req, res) => {
-  User.findOneAndUpdate(
-    { _id: req.profile._id },
-    { $set: req.body },
-    { new: true },
-    (err, user) => {
-      if (err) {
-        return res.status(400).json({
-          error: "Not Authorized to update this profile",
-        });
-      }
-      user.salt = undefined;
-      user.hashed_password = undefined;
-      res.json(user);
+  User.findOne(req.profile._id, (err, user) => {
+    if (err || !user) {
+      return res.status(400).json({
+        error: "User does not exist",
+      });
     }
-  );
+
+    let { name, email } = req.body;
+    let hashed_password = user.encryptPassword(req.body.password);
+
+    let dataUpdate = {
+      name: name,
+      email: email,
+      hashed_password: hashed_password,
+    };
+
+    User.findOneAndUpdate(
+      { _id: req.profile._id },
+      { $set: dataUpdate },
+      { new: true },
+      (err, user) => {
+        if (err) {
+          return res.status(400).json({
+            error: "Not Authorized to update this profile",
+          });
+        }
+
+        user.salt = undefined;
+        user.hashed_password = undefined;
+        res.json(user);
+      }
+    );
+  });
 };
 
 exports.addOrderToUserHistory = (req, res, next) => {
