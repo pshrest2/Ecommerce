@@ -6,6 +6,7 @@ const {
   read,
   update,
   purchaseHistory,
+  hashed_password,
 } = require("../controllers/user");
 
 const { requireSignin, isAuth, isAdmin } = require("../controllers/auth");
@@ -17,6 +18,7 @@ router.get("/secret/:userId", requireSignin, isAuth, isAdmin, (req, res) => {
 });
 
 router.get("/user/:userId", requireSignin, isAuth, read);
+router.post("/verify/password", requireSignin, hashed_password);
 router.get("/orders/by/user/:userId", requireSignin, isAuth, purchaseHistory);
 
 router.put("/user/:userId", requireSignin, isAuth, update);

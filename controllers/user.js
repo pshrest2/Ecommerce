@@ -21,6 +21,23 @@ exports.read = (req, res) => {
   return res.json(req.profile);
 };
 
+exports.hashed_password = (req, res) => {
+  let userId = req.body.id;
+  User.findOne({ _id: userId }, (err, user) => {
+    if (err || !user) {
+      return res.status(400).json({
+        error: "User does not exists",
+      });
+    }
+
+    if (user.authenticate(req.body.old_password)) {
+      return res.json(true);
+    } else {
+      return res.json(false);
+    }
+  });
+};
+
 exports.update = (req, res) => {
   User.findOne(req.profile._id, (err, user) => {
     if (err || !user) {
