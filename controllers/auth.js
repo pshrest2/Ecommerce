@@ -24,16 +24,13 @@ exports.signup = (req, res) => {
 
 exports.signin = (req, res) => {
   //find user based on email
-
   const { email, password } = req.body;
-
   User.findOne({ email }, (err, user) => {
     if (err || !user) {
       return res.status(400).json({
         error: "User with that email does not exist. Please signup",
       });
     }
-
     //if user is found, make sure the email and password match
     //create authenticate method in user model
     if (!user.authenticate(password)) {
@@ -41,13 +38,10 @@ exports.signin = (req, res) => {
         error: "Email or Password does not match",
       });
     }
-
     //generate a signed token with user id and secret
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
-
     //persist the token as 't' in cookie with expiry date
-    res.cookie("t", token, { expire: new Date() + 9999 });
-
+    res.cookie("t", token, { expire: 5000 });
     //return response with user and token to frontend client
     const { _id, name, email, role } = user;
 
