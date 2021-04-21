@@ -29,7 +29,7 @@ mongoose
     console.log("DB Connected");
   })
   .catch(() => {
-    console.log("DB Connect Vayena");
+    console.log("Cannot Connect to DB");
   });
 
 mongoose.connection.on("error", (err) => {

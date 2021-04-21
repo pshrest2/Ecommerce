@@ -29,7 +29,7 @@ router.put(
   update
 );
 
-router.get("/categories/", list);
+router.get("/categories", list);
 
 router.param("userId", userById);
 router.param("categoryId", categoryById);

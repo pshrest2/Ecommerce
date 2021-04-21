@@ -46,14 +46,18 @@ exports.update = (req, res) => {
       });
     }
 
-    let { name, email } = req.body;
-    let hashed_password = user.encryptPassword(req.body.password);
+    let { name, email, password } = req.body;
+    let dataUpdate = {};
 
-    let dataUpdate = {
-      name: name,
-      email: email,
-      hashed_password: hashed_password,
-    };
+    if (password !== "") {
+      let hashed_password = user.encryptPassword(password);
+      dataUpdate.name = name;
+      dataUpdate.email = email;
+      dataUpdate.hashed_password = hashed_password;
+    } else {
+      dataUpdate.name = name;
+      dataUpdate.email = email;
+    }
 
     User.findOneAndUpdate(
       { _id: req.profile._id },
