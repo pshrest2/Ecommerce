@@ -1,7 +1,7 @@
-const User = require("../models/user");
 const braintree = require("braintree");
 require("dotenv").config();
 
+//get all the env variables for braintree setup from .env file
 const gateway = new braintree.BraintreeGateway({
   environment: braintree.Environment.Sandbox,
   merchantId: process.env.BRAINTREE_MERCHANT_ID,
@@ -9,6 +9,7 @@ const gateway = new braintree.BraintreeGateway({
   privateKey: process.env.BRAINTREE_PRIVATE_KEY,
 });
 
+//generate a token to show the DropIn UI
 exports.generateToken = (req, res) => {
   gateway.clientToken.generate({}, function (err, token) {
     if (err) {
@@ -19,6 +20,7 @@ exports.generateToken = (req, res) => {
   });
 };
 
+//controller function to process a payment once all info (credit-card/paypal, amount) is received from client
 exports.processPayment = (req, res) => {
   let nonceClient = req.body.paymentMethodNonce;
   let amountClient = req.body.amount;

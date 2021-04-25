@@ -1,5 +1,6 @@
 const expressValidator = require("express-validator");
 
+//middleware to validate a form while creating a new account
 exports.userSignupValidator = (req, res, next) => {
   req.check("name", "Name is required").notEmpty();
   req

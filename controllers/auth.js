@@ -4,6 +4,7 @@ const expressJwt = require("express-jwt"); //for authorization check
 
 const { errorHandler } = require("../helpers/dbErrorHandler");
 
+//controller function for signup
 exports.signup = (req, res) => {
   const user = new User(req.body);
   console.log(req.body);
@@ -22,6 +23,7 @@ exports.signup = (req, res) => {
   });
 };
 
+//controller function for signin
 exports.signin = (req, res) => {
   //find user based on email
   const { email, password } = req.body;
@@ -49,25 +51,22 @@ exports.signin = (req, res) => {
   });
 };
 
+//controller function for signout
 exports.signout = (req, res) => {
   res.clearCookie("t");
   res.json({ message: "Signout Success" });
 };
 
+//middleware to authorize users. Need to signin before accessing certain page
 exports.requireSignin = expressJwt({
   secret: process.env.JWT_SECRET,
   algorithms: ["HS256"], // added later
   userProperty: "auth",
 });
 
+//middleware for authentication
 exports.isAuth = (req, res, next) => {
   let user = req.profile && req.auth && req.profile._id == req.auth._id;
-
-  // console.log(req.profile);
-  // console.log(req.auth);
-  // console.log(req.profile._id);
-  // console.log(req.auth._id);
-
   if (!user) {
     return res.status(403).json({
       error: "Access Denied",
@@ -76,6 +75,7 @@ exports.isAuth = (req, res, next) => {
   next();
 };
 
+//middleware for checking if user is admin
 exports.isAdmin = (req, res, next) => {
   if (req.profile.role === 0) {
     return res.status(403).json({

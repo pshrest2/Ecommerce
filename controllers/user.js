@@ -2,6 +2,7 @@ const { errorHandler } = require("../helpers/dbErrorHandler");
 const { Order } = require("../models/order");
 const User = require("../models/user");
 
+//find a user by his/her id
 exports.userById = (req, res, next, id) => {
   User.findById(id).exec((err, user) => {
     if (err || !user) {
@@ -14,6 +15,7 @@ exports.userById = (req, res, next, id) => {
   });
 };
 
+//Read a user
 exports.read = (req, res) => {
   req.profile.hashed_password = undefined;
   req.profile.salt = undefined;
@@ -21,6 +23,7 @@ exports.read = (req, res) => {
   return res.json(req.profile);
 };
 
+//function to authenticate. Return true if password match
 exports.hashed_password = (req, res) => {
   let userId = req.body.id;
   User.findOne({ _id: userId }, (err, user) => {
@@ -38,7 +41,9 @@ exports.hashed_password = (req, res) => {
   });
 };
 
+//update user profile
 exports.update = (req, res) => {
+  //find a user
   User.findOne(req.profile._id, (err, user) => {
     if (err || !user) {
       return res.status(400).json({
@@ -46,19 +51,24 @@ exports.update = (req, res) => {
       });
     }
 
+    //dereference name, email, password from request body
     let { name, email, password } = req.body;
     let dataUpdate = {};
 
+    //only update password if password field is not empty
     if (password !== "") {
       let hashed_password = user.encryptPassword(password);
       dataUpdate.name = name;
       dataUpdate.email = email;
       dataUpdate.hashed_password = hashed_password;
-    } else {
+    }
+    //if password field is empty, simply update either name or email
+    else {
       dataUpdate.name = name;
       dataUpdate.email = email;
     }
 
+    //Update the DB with new information
     User.findOneAndUpdate(
       { _id: req.profile._id },
       { $set: dataUpdate },
@@ -78,9 +88,11 @@ exports.update = (req, res) => {
   });
 };
 
+//add order to purchase history
 exports.addOrderToUserHistory = (req, res, next) => {
   let history = [];
 
+  //for each products in the order, add it to the history array
   req.body.order.products.forEach((item) => {
     history.push({
       _id: item._id,
@@ -93,6 +105,7 @@ exports.addOrderToUserHistory = (req, res, next) => {
     });
   });
 
+  //find the user and update the history array for him/her
   User.findOneAndUpdate(
     { _id: req.profile._id },
     { $push: { history: history } },
@@ -108,6 +121,7 @@ exports.addOrderToUserHistory = (req, res, next) => {
   );
 };
 
+//list the purchase history for a user
 exports.purchaseHistory = (req, res) => {
   Order.find({ user: req.profile._id })
     .populate("user", "_id name")

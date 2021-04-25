@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const { ObjectId } = mongoose.Schema;
 
+//schema for cart item model
 const CartItemSchema = new mongoose.Schema(
   {
     product: { type: ObjectId, ref: "Product" },
@@ -14,6 +15,7 @@ const CartItemSchema = new mongoose.Schema(
 
 const CartItem = mongoose.model("CartItem", CartItemSchema);
 
+//schema for order model
 const OrderSchema = new mongoose.Schema(
   {
     products: [CartItemSchema],

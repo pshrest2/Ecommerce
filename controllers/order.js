@@ -1,6 +1,7 @@
 const { Order, CartItem } = require("../models/order");
 const { errorHandler } = require("../helpers/dbErrorHandler");
 
+//find an order with its given id
 exports.orderById = (req, res, next, id) => {
   Order.findById(id)
     .populate("products.product", "name price")
@@ -15,6 +16,7 @@ exports.orderById = (req, res, next, id) => {
     });
 };
 
+//create a new order
 exports.create = (req, res) => {
   req.body.order.user = req.profile;
   const order = new Order(req.body.order);
@@ -28,6 +30,7 @@ exports.create = (req, res) => {
   });
 };
 
+//list all the orders made
 exports.listOrders = (req, res) => {
   Order.find()
     .populate("user", "_id name address1 address2 city state zip")
@@ -42,14 +45,17 @@ exports.listOrders = (req, res) => {
     });
 };
 
+//find an order
 exports.findOrder = (req, res) => {
   return res.json(req.order);
 };
 
+//get all the order status data
 exports.getStatusValues = (req, res) => {
   res.json(Order.schema.path("status").enumValues);
 };
 
+//update the status of an order
 exports.updateOrderStatus = (req, res) => {
   Order.update(
     { _id: req.body.orderId },

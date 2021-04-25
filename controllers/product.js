@@ -5,6 +5,7 @@ const fs = require("fs");
 
 const { errorHandler } = require("../helpers/dbErrorHandler");
 
+//get a product from its given id
 exports.productById = (req, res, next, id) => {
   Product.findById(id)
     .populate("category")
@@ -19,14 +20,16 @@ exports.productById = (req, res, next, id) => {
     });
 };
 
+//read a product
 exports.read = (req, res) => {
   req.product.photo = undefined; //make seperate method to send photo. don't send photo here
   return res.json(req.product);
 };
 
+//create a product
 exports.create = (req, res) => {
-  const form = new formidable.IncomingForm();
-  form.keepExtensions = true;
+  const form = new formidable.IncomingForm(); //use formidable package to handle the incomming form
+  form.keepExtensions = true; //for extensions of images
   form.parse(req, (err, fields, files) => {
     if (err) {
       res.status(400).json({
@@ -49,17 +52,18 @@ exports.create = (req, res) => {
       });
     }
 
+    //create a new product model
     let product = new Product(fields);
 
-    //validate photo so it is not > 2MB in size
+    //validate photo so it is not > 20MB in size
     if (files.photo) {
       if (files.photo.size > 2000000) {
         return res.status(400).json({
-          error: "Image needs to be less than 1 MB",
+          error: "Image needs to be less than 20 MB",
         });
       }
-      product.photo.data = fs.readFileSync(files.photo.path);
-      product.photo.content = files.photo.type;
+      product.photo.data = fs.readFileSync(files.photo.path); //access the file system
+      product.photo.content = files.photo.type; //access the photo type (.png, .jpg, etc.)
     }
 
     // if everything looks good, finally save the product to the database and send the result response back to client
@@ -75,6 +79,7 @@ exports.create = (req, res) => {
   });
 };
 
+//delete a product
 exports.remove = (req, res) => {
   let product = req.product;
   product.remove((err, productDeleted) => {
@@ -89,6 +94,7 @@ exports.remove = (req, res) => {
   });
 };
 
+//update a product
 exports.update = (req, res) => {
   const form = new formidable.IncomingForm();
   form.keepExtensions = true;
@@ -100,12 +106,10 @@ exports.update = (req, res) => {
     }
 
     let product = req.product;
-    product = _.extend(product, fields);
+    product = _.extend(product, fields); //replace the existing product info with the new fields
 
-    //validate photo so it is not > 2MB in size
+    //validate photo so it is not > 20MB in size
     if (files.photo) {
-      console.log("FILES PHOTO: ", files.photo);
-
       if (files.photo.size > 20000000) {
         return res.status(400).json({
           error: "Image needs to be less than 20 MB",
@@ -128,21 +132,15 @@ exports.update = (req, res) => {
   });
 };
 
-/*
--> sell /arrival
--> by sell = /products?sortBy=sold&order=desc&limit=4
--> by arrival = /products?sortBy=createdAt&order=desc&limit=4
--> if no params are sent, then all products are returned
-
-Note: All the query parameters will come from client (browers)
-*/
+//All the query parameters will come from client (brower)
+//list products by query parameters
 exports.list = (req, res) => {
-  let order = req.query.order ? req.query.order : "asc";
-  let sortBy = req.query.sortBy ? req.query.sortBy : "_id";
-  let limit = req.query.limit ? parseInt(req.query.limit) : 5;
+  let order = req.query.order ? req.query.order : "asc"; //if no orderBy query passed in URL, order in ascending
+  let sortBy = req.query.sortBy ? req.query.sortBy : "_id"; //if not sortBy query passed in URL, sort by the ID
+  let limit = req.query.limit ? parseInt(req.query.limit) : 5; //by default only display 5 products
 
   Product.find()
-    .select("-photo")
+    .select("-photo") //neglect the photos
     .populate("category")
     .sort([[sortBy, order]])
     .limit(limit)
@@ -158,10 +156,10 @@ exports.list = (req, res) => {
 
 // it will find the products based on the request product category
 // other products that has the same category will be returned
-
 exports.listRelated = (req, res) => {
   let limit = req.query.limit ? parseInt(req.query.limit) : 5;
 
+  //find products by id in a specific category
   Product.find({
     _id: { $ne: req.product },
     category: req.product.category,
@@ -178,6 +176,7 @@ exports.listRelated = (req, res) => {
     });
 };
 
+//list all categories
 exports.listCategories = (req, res) => {
   Product.distinct("category", {}, (err, categories) => {
     if (err) {
@@ -189,6 +188,7 @@ exports.listCategories = (req, res) => {
   });
 };
 
+//filter products based on specific filters (category/price range)
 exports.listBySearch = (req, res) => {
   let order = req.query.order ? req.query.order : "desc";
   let sortBy = req.query.sortBy ? req.query.sortBy : "_id";
@@ -196,13 +196,11 @@ exports.listBySearch = (req, res) => {
   let skip = parseInt(req.body.skip);
   let findArgs = {};
 
-  console.log(req.body);
-
   for (let key in req.body.filters) {
     if (req.body.filters[key].length > 0) {
       if (key === "price") {
         // gte -  greater than price [0-10]
-        // lte - less than
+        // lte - less than price
         findArgs[key] = {
           $gte: req.body.filters[key][0],
           $lte: req.body.filters[key][1],
@@ -232,6 +230,7 @@ exports.listBySearch = (req, res) => {
     });
 };
 
+//controller function for the serach bar
 exports.listSearched = (req, res) => {
   //create query object to hold search value and category value
   const querySearchAndCategory = {};
@@ -264,6 +263,7 @@ exports.listSearched = (req, res) => {
   }
 };
 
+//middleware for getting photo
 exports.photo = (req, res, next) => {
   if (req.product.photo.data) {
     res.set("Content-Type", req.product.photo.contentType);
@@ -272,6 +272,7 @@ exports.photo = (req, res, next) => {
   next();
 };
 
+//controller function to update sold attribute when someone buys that product
 exports.decreaseQuantity = (req, res, next) => {
   let bulkOptions = req.body.order.products.map((item) => {
     return {
@@ -282,6 +283,7 @@ exports.decreaseQuantity = (req, res, next) => {
     };
   });
 
+  //use of bulkWrite to send multiple operations to MongoDB
   Product.bulkWrite(bulkOptions, {}, (error, products) => {
     if (error) {
       return res.status(400).json({
